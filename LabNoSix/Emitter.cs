@@ -99,52 +99,113 @@ namespace LabNoSix
             }
 
         }
-
         public class GravityPoint : IImpactPoint
         {
-            public int Power = 100; // сила притяжения
+            public int Power = 50; // сила притяжения
+            public bool IsActive = true; // активен ли гравитон
 
-            // а сюда по сути скопировали с минимальными правками то что было в UpdateState
             public override void ImpactParticle(Particle particle)
             {
+                if (!IsActive) return; // если гравитон неактивен – ничего не делаем
+
                 float gX = X - particle.X;
                 float gY = Y - particle.Y;
 
-                double r = Math.Sqrt(gX * gX + gY * gY); // считаем расстояние от центра точки до центра частицы
-                if (r + particle.Radius < Power / 2) // если частица оказалось внутри окружности
+                double r = Math.Sqrt(gX * gX + gY * gY);
+                if (r + particle.Radius < Power / 2)
                 {
-                    // то притягиваем ее
                     float r2 = (float)Math.Max(100, gX * gX + gY * gY);
                     particle.SpeedX += gX * Power / r2;
                     particle.SpeedY += gY * Power / r2;
                 }
             }
+
             public override void Render(Graphics g)
             {
-                // буду рисовать окружность с диаметром равным Power
-                g.DrawEllipse(
-                       new Pen(Color.Red),
-                       X - Power / 2,
-                       Y - Power / 2,
-                       Power,
-                       Power
-                   );
+                if (!IsActive) return; // если неактивен – не рисуем
 
-                var stringFormat = new StringFormat(); // создаем экземпляр класса
-                stringFormat.Alignment = StringAlignment.Center; // выравнивание по горизонтали
-                stringFormat.LineAlignment = StringAlignment.Center; // выравнивание по вертикали
+                g.DrawEllipse(
+                    new Pen(Color.Red),
+                    X - Power / 2,
+                    Y - Power / 2,
+                    Power,
+                    Power
+                );
+
+                var stringFormat = new StringFormat();
+                stringFormat.Alignment = StringAlignment.Center;
+                stringFormat.LineAlignment = StringAlignment.Center;
 
                 g.DrawString(
-                 $"Я гравитон\nc силой {Power}",
-                 new Font("Verdana", 10),
-                 new SolidBrush(Color.White),
-                 X,
-                 Y,
-                 stringFormat // передаем инфу о выравнивании
-                 );
-
+                    $"Я гравитон\nc силой {Power}",
+                    new Font("Verdana", 10),
+                    new SolidBrush(Color.White),
+                    X,
+                    Y,
+                    stringFormat
+                );
             }
         }
+
+        public class CounterPoint : IImpactPoint
+        {
+            public int Count = 0;
+            public int SmallCount = 0;    // < 5px
+            public int MediumCount = 0;   // 5-10px
+            public int LargeCount = 0;    // > 10px
+            public int Radius = 50;
+
+            public override void ImpactParticle(Particle particle)
+            {
+                float dx = X - particle.X;
+                float dy = Y - particle.Y;
+                float distance = (float)Math.Sqrt(dx * dx + dy * dy);
+
+                if (distance < Radius + particle.Radius)
+                {
+                    Count++;
+
+                    // Классифицируем частицы по размеру
+                    if (particle.Radius < 5) SmallCount++;
+                    else if (particle.Radius <= 10) MediumCount++;
+                    else LargeCount++;
+
+                    particle.Life = 0;
+                }
+            }
+
+            public override void Render(Graphics g)
+            {
+                // Рисуем окружность
+                g.DrawEllipse(
+                    new Pen(Color.Orange, 2),
+                    X - Radius,
+                    Y - Radius,
+                    Radius * 2,
+                    Radius * 2
+                );
+
+                // Формируем текст с детализацией
+                string info = $"Всего: {Count}\n" +
+                             $"Мелкие: {SmallCount}\n" +
+                             $"Средние: {MediumCount}\n" +
+                             $"Крупные: {LargeCount}";
+
+                var stringFormat = new StringFormat();
+                stringFormat.Alignment = StringAlignment.Center;
+
+                // Рисуем текст с переносами строк
+                g.DrawString(
+                    info,
+                    new Font("Arial", 8),
+                    new SolidBrush(Color.White),
+                    new RectangleF(X - Radius, Y - Radius, Radius * 2, Radius * 2),
+                    stringFormat
+                );
+            }
+        }
+
+
 
         public class AntiGravityPoint : IImpactPoint
         {

@@ -17,12 +17,13 @@ namespace LabNoSix
         List<Emitter> emitters = new List<Emitter>();
         Emitter emitter; // добавим поле для эмиттера
 
-        GravityPoint point1; // добавил поле под первую точку
-        GravityPoint point2; // добавил поле под вторую точку
+        GravityPoint point; // добавил поле под первую точку
 
         public Form1()
         {
+
             InitializeComponent();
+            picDisplay.MouseWheel += picDisplay_MouseWheel;
             picDisplay.Image = new Bitmap(picDisplay.Width, picDisplay.Height);
 
             this.emitter = new Emitter // создаю эмиттер и привязываю его к полю emitter
@@ -31,8 +32,8 @@ namespace LabNoSix
                 Spreading = 10,
                 SpeedMin = 10,
                 SpeedMax = 10,
-                ColorFrom = Color.Gold,
-                ColorTo = Color.FromArgb(0, Color.Red),
+                ColorFrom = Color.Purple,
+                ColorTo = Color.FromArgb(0, Color.Fuchsia),
                 ParticlesPerTick = 10,
                 X = picDisplay.Width / 2,
                 Y = picDisplay.Height / 2,
@@ -42,20 +43,15 @@ namespace LabNoSix
             // до сюда НЕ ТРОГАЕМ
 
             // привязываем гравитоны к полям
-            point1 = new GravityPoint
+            point = new GravityPoint
             {
                 X = picDisplay.Width / 2 + 100,
                 Y = picDisplay.Height / 2,
-            };
-            point2 = new GravityPoint
-            {
-                X = picDisplay.Width / 2 - 100,
-                Y = picDisplay.Height / 2,
+                IsActive = false
             };
 
             // привязываем поля к эмиттеру
-            emitter.impactPoints.Add(point1);
-            emitter.impactPoints.Add(point2);
+            emitter.impactPoints.Add(point);
         }
 
         int counter = 0; // добавлю счетчик чтобы считать вызовы функции
@@ -88,8 +84,8 @@ namespace LabNoSix
             }
 
             // а тут передаем положение мыши, в положение гравитона
-            point2.X = e.X;
-            point2.Y = e.Y;
+            point.X = e.X;
+            point.Y = e.Y;
         }
 
         private void tbDirection_Scroll(object sender, EventArgs e)
@@ -100,12 +96,76 @@ namespace LabNoSix
 
         private void tbGraviton_Scroll(object sender, EventArgs e)
         {
-            point2.Power = tbGraviton.Value;
+            point.Power = tbGraviton.Value;
+            lblGraviton.Text = $"{tbGraviton.Value}°"; // добавил вывод значения
         }
 
-        private void tbGraviton2_Scroll(object sender, EventArgs e)
+        private void picDisplay_MouseClick(object sender, MouseEventArgs e)
         {
-            point1.Power = tbGraviton2.Value;
+            if (e.Button == MouseButtons.Left) // ЛКМ – добавить счетчик
+            {
+                var counter = new CounterPoint
+                {
+                    X = e.X,
+                    Y = e.Y
+                };
+                emitter.impactPoints.Add(counter);
+            }
+            else if (e.Button == MouseButtons.Right) // ПКМ – удалить ближайший
+            {
+                // Ищем ближайший счетчик
+                CounterPoint closest = null;
+                float minDist = float.MaxValue;
+
+                foreach (var point in emitter.impactPoints.OfType<CounterPoint>())
+                {
+                    float dx = point.X - e.X;
+                    float dy = point.Y - e.Y;
+                    float distance = dx * dx + dy * dy;
+
+                    if (distance < minDist)
+                    {
+                        minDist = distance;
+                        closest = point;
+                    }
+                }
+
+                if (closest != null)
+                    emitter.impactPoints.Remove(closest);
+            }
         }
+
+        private void chbGraviton_CheckedChanged(object sender, EventArgs e)
+        {
+            point.IsActive = chbGraviton.Checked; // включаем/выключаем гравитон
+        }
+        private void picDisplay_MouseWheel(object sender, MouseEventArgs e)
+        {
+            // Находим ближайший CounterPoint
+            CounterPoint closestCounter = null;
+            float minDistance = float.MaxValue;
+
+            foreach (var point in emitter.impactPoints.OfType<CounterPoint>())
+            {
+                float dx = point.X - e.X;
+                float dy = point.Y - e.Y;
+                float distance = dx * dx + dy * dy;
+
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    closestCounter = point;
+                }
+            }
+
+            // Если нашли CounterPoint и он близко к курсору (например, в радиусе 100px)
+            if (closestCounter != null && minDistance < 10000) // 100px * 100px = 10000
+            {
+                // Изменяем радиус с проверкой границ
+                int newRadius = closestCounter.Radius + (e.Delta > 0 ? 5 : -5);
+                closestCounter.Radius = Math.Max(10, Math.Min(200, newRadius));
+            }
+        }
+
     }
 }
