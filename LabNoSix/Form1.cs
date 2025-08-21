@@ -32,8 +32,8 @@ namespace LabNoSix
                 Spreading = 10,
                 SpeedMin = 10,
                 SpeedMax = 10,
-                ColorFrom = Color.Purple,
-                ColorTo = Color.FromArgb(0, Color.Fuchsia),
+                ColorFrom = Color.Olive,
+                ColorTo = Color.FromArgb(0, Color.LimeGreen),
                 ParticlesPerTick = 10,
                 X = picDisplay.Width / 2,
                 Y = picDisplay.Height / 2,
@@ -55,7 +55,7 @@ namespace LabNoSix
         }
 
         int counter = 0; // добавлю счетчик чтобы считать вызовы функции
-
+        double tempSpeed = 0;
         // ну и обработка тика таймера, тут просто декомпозицию выполнили
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -67,6 +67,7 @@ namespace LabNoSix
                 emitter.Render(g); // а тут теперь рендерим через эмиттер
             }
 
+            lblActiveParticles.Text = $"Частицы: {emitter.ActiveParticlesCount.ToString()}";
             picDisplay.Invalidate();
         }
 
@@ -86,18 +87,6 @@ namespace LabNoSix
             // а тут передаем положение мыши, в положение гравитона
             point.X = e.X;
             point.Y = e.Y;
-        }
-
-        private void tbDirection_Scroll(object sender, EventArgs e)
-        {
-            emitter.Direction = tbDirection.Value;
-            lblDirection.Text = $"{tbDirection.Value}°"; // добавил вывод значения
-        }
-
-        private void tbGraviton_Scroll(object sender, EventArgs e)
-        {
-            point.Power = tbGraviton.Value;
-            lblGraviton.Text = $"{tbGraviton.Value}°"; // добавил вывод значения
         }
 
         private void picDisplay_MouseClick(object sender, MouseEventArgs e)
@@ -167,5 +156,42 @@ namespace LabNoSix
             }
         }
 
+        private void tbDirection_Scroll(object sender, EventArgs e)
+        {
+            emitter.Direction = tbDirection.Value;
+            lblDirection.Text = $"{tbDirection.Value}°"; // добавил вывод значения
+        }
+
+        private void tbGraviton_Scroll(object sender, EventArgs e)
+        {
+            point.Power = tbGraviton.Value;
+            lblGraviton.Text = $"{tbGraviton.Value} ед."; // добавил вывод значения
+        }
+
+        private void tbSpreading_Scroll(object sender, EventArgs e)
+        {
+            emitter.Spreading = tbSpreading.Value;
+            lblSpreading.Text = $"{tbSpreading.Value}°"; // добавил вывод значения
+        }
+
+        private void tbSpeed_Scroll(object sender, EventArgs e)
+        {
+            emitter.SpeedMin = tbSpeed.Value / 5;
+            emitter.SpeedMax = tbSpeed.Value;
+            lblSpeed.Text = $"{tbSpeed.Value} см/с"; // добавил вывод значения
+        }
+        private void trackBar4_Scroll(object sender, EventArgs e)
+        {
+            emitter.LifeMax = tbLife.Value;
+            tempSpeed = tbLife.Value / 5;
+            emitter.LifeMin = (int)Math.Round(tempSpeed);
+            lblLife.Text = $"{tbLife.Value} т.";
+        }
+
+        private void tbParticlesPerTick_Scroll(object sender, EventArgs e)
+        {
+            emitter.ParticlesPerTick = tbParticlesPerTick.Value;
+            lblParticlesPerTick.Text = $"{tbParticlesPerTick.Value} ч/т";
+        }
     }
 }
