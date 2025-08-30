@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using LabNoSix.EmitterSub;
 using static LabNoSix.Emitter;
 using static LabNoSix.Particle;
 
@@ -16,8 +17,6 @@ namespace LabNoSix
     {
         List<Emitter> emitters = new List<Emitter>();
         Emitter emitter; // добавим поле для эмиттера
-
-        GravityPoint point; // добавил поле под первую точку
 
         public Form1()
         {
@@ -30,7 +29,7 @@ namespace LabNoSix
             {
                 Direction = 0,
                 Spreading = 10,
-                SpeedMin = 10,
+                SpeedMin = 2,
                 SpeedMax = 10,
                 ColorFrom = Color.Olive,
                 ColorTo = Color.FromArgb(0, Color.LimeGreen),
@@ -42,16 +41,6 @@ namespace LabNoSix
             emitters.Add(this.emitter);
             // до сюда НЕ ТРОГАЕМ
 
-            // привязываем гравитоны к полям
-            point = new GravityPoint
-            {
-                X = picDisplay.Width / 2 + 100,
-                Y = picDisplay.Height / 2,
-                IsActive = false
-            };
-
-            // привязываем поля к эмиттеру
-            emitter.impactPoints.Add(point);
         }
 
         int counter = 0; // добавлю счетчик чтобы считать вызовы функции
@@ -84,9 +73,6 @@ namespace LabNoSix
                 emitter.MousePositionY = e.Y;
             }
 
-            // а тут передаем положение мыши, в положение гравитона
-            point.X = e.X;
-            point.Y = e.Y;
         }
 
         private void picDisplay_MouseClick(object sender, MouseEventArgs e)
@@ -124,10 +110,6 @@ namespace LabNoSix
             }
         }
 
-        private void chbGraviton_CheckedChanged(object sender, EventArgs e)
-        {
-            point.IsActive = chbGraviton.Checked; // включаем/выключаем гравитон
-        }
         private void picDisplay_MouseWheel(object sender, MouseEventArgs e)
         {
             // Находим ближайший CounterPoint
@@ -162,12 +144,6 @@ namespace LabNoSix
             lblDirection.Text = $"{tbDirection.Value}°"; // добавил вывод значения
         }
 
-        private void tbGraviton_Scroll(object sender, EventArgs e)
-        {
-            point.Power = tbGraviton.Value;
-            lblGraviton.Text = $"{tbGraviton.Value} ед."; // добавил вывод значения
-        }
-
         private void tbSpreading_Scroll(object sender, EventArgs e)
         {
             emitter.Spreading = tbSpreading.Value;
@@ -180,18 +156,19 @@ namespace LabNoSix
             emitter.SpeedMax = tbSpeed.Value;
             lblSpeed.Text = $"{tbSpeed.Value} см/с"; // добавил вывод значения
         }
-        private void trackBar4_Scroll(object sender, EventArgs e)
-        {
-            emitter.LifeMax = tbLife.Value;
-            tempSpeed = tbLife.Value / 5;
-            emitter.LifeMin = (int)Math.Round(tempSpeed);
-            lblLife.Text = $"{tbLife.Value} т.";
-        }
 
         private void tbParticlesPerTick_Scroll(object sender, EventArgs e)
         {
             emitter.ParticlesPerTick = tbParticlesPerTick.Value;
             lblParticlesPerTick.Text = $"{tbParticlesPerTick.Value} ч/т";
+        }
+
+        private void tbLife_Scroll(object sender, EventArgs e)
+        {
+            emitter.LifeMax = tbLife.Value;
+            tempSpeed = tbLife.Value / 5;
+            emitter.LifeMin = (int)Math.Round(tempSpeed);
+            lblLife.Text = $"{tbLife.Value} т.";
         }
     }
 }

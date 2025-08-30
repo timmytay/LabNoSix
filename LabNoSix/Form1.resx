@@ -120,4 +120,15 @@
   <metadata name="timer1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <data name="label2.Text" xml:space="preserve">
+    <value>Чтобы добавить новый сборщик частиц, 
+нажмите левой кнопкой мыши в рамках.
+Для того, чтобы убрать последний 
+добавленный сборщик, нажмите 
+правой кнопкой мыши.
+Вы можете увеличивать/уменьшать 
+размер объекта, который находится
+близко к курсору мыши с помощью
+колёсика мыши.</value>
+  </data>
 </root>
